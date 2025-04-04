@@ -16,10 +16,20 @@ if 'show_popup' not in st.session_state:
     st.session_state.show_popup = False
 
 # Function to encode PDF as base64 and embed it
+# Modify your show_pdf_preview function
 def show_pdf_preview(uploaded_file):
     try:
+        # Save the current position
+        current_position = uploaded_file.tell()
+        # Reset to beginning of file
+        uploaded_file.seek(0)
+        
         pdf_bytes = uploaded_file.read()
         base64_pdf = base64.b64encode(pdf_bytes).decode('utf-8')
+        
+        # Reset the file position back to where it was
+        uploaded_file.seek(current_position)
+        
         pdf_display = f'<iframe src="data:application/pdf;base64,{base64_pdf}" width="100%" height="400" type="application/pdf"></iframe>'
         return pdf_display
     except Exception as e:
@@ -152,6 +162,7 @@ if uploaded_file:
     if st.button("🔍 Analyze Resume", type="primary"):
         with st.spinner("Analyzing resume content..."):
             try:
+                uploaded_file.seek(0)
                 text = extract_text(uploaded_file)
                 
                 if not text.strip():
