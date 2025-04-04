@@ -5,7 +5,7 @@ import torch
 from pdf2image import convert_from_bytes
 from io import BytesIO
 from PIL import Image
-
+import base64
 # --- App Configuration ---
 st.set_page_config(
     page_title="✨ Professional Resume Categorizer",
@@ -133,6 +133,15 @@ with st.sidebar:
     2. Click 'Analyze'
     3. View predicted category
     """)
+    st.markdown("---")
+    with open("example.zip", "rb") as file:
+        b64 = base64.b64encode(file.read()).decode()
+        href = f'''
+                    <a href="data:application/zip;base64,{b64}" download="example.zip" 
+                    style="font-size: 0.9em; color: #6c757d; text-decoration: none;">
+                    📦 Download Examples</a>
+                '''
+        st.markdown(href, unsafe_allow_html=True)
 
 # --- Main Interface ---
 st.title("📄 Professional Resume Categorizer")
