@@ -2,10 +2,8 @@ import streamlit as st
 from transformers import BertForSequenceClassification, BertTokenizer
 from PyPDF2 import PdfReader
 import torch
-from pdf2image import convert_from_bytes
-from io import BytesIO
-from PIL import Image
 import base64
+
 # --- App Configuration ---
 st.set_page_config(
     page_title="✨ Professional Resume Categorizer",
@@ -17,13 +15,15 @@ st.set_page_config(
 if 'show_popup' not in st.session_state:
     st.session_state.show_popup = False
 
-# Function to convert PDF first page to image
-def get_pdf_first_page_image(pdf_file):
+# Function to encode PDF as base64 and embed it
+def show_pdf_preview(uploaded_file):
     try:
-        images = convert_from_bytes(pdf_file.read(), first_page=1, last_page=1)
-        return images[0]
+        pdf_bytes = uploaded_file.read()
+        base64_pdf = base64.b64encode(pdf_bytes).decode('utf-8')
+        pdf_display = f'<iframe src="data:application/pdf;base64,{base64_pdf}" width="100%" height="400" type="application/pdf"></iframe>'
+        return pdf_display
     except Exception as e:
-        st.error(f"Error converting PDF to image: {str(e)}")
+        st.error(f"Error generating PDF preview: {str(e)}")
         return None
 
 # Preview button and popup code
@@ -32,19 +32,15 @@ def show_preview_button(uploaded_file):
         st.session_state.show_popup = True
 
     if st.session_state.show_popup and uploaded_file is not None:
-        first_page_image = get_pdf_first_page_image(uploaded_file)
-        if first_page_image:
-            img_buffer = BytesIO()
-            first_page_image.save(img_buffer, format="PNG")
-            img_bytes = img_buffer.getvalue()
-
+        pdf_display = show_pdf_preview(uploaded_file)
+        if pdf_display:
             col1, col2, col3 = st.columns([1, 3, 1])
             with col2:
                 with st.container(border=True):
-                    st.image(img_bytes, caption="First Page Preview", use_container_width=True)
+                    st.markdown(pdf_display, unsafe_allow_html=True)
                     if st.button("Close", key="close_preview_button"):
                         st.session_state.show_popup = False
-                        st.experimental_rerun()
+                        st.rerun()
 
 # --- Category Data ---
 CATEGORIES = [
@@ -106,11 +102,9 @@ with st.sidebar:
     st.title("Categories")
     
     with st.expander("🔍 Browse All (24)", expanded=False):
-        # Search bar for categories
         search_term = st.text_input("Search categories", "")
         filtered_categories = [cat for cat in CATEGORIES if search_term.lower() in cat.lower()]
         
-        # Grid layout for categories
         cols = st.columns(2)
         for i, category in enumerate(sorted(filtered_categories)):
             with cols[i % 2]:
