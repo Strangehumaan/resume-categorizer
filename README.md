@@ -13,13 +13,3 @@
 9. **Categories**: Sample of the 24 categories to give users an idea.
 10. **Contributing/Credits/License**: Standard open-source sections.
 
----
-
-### How to Use
-1. Copy this entire content into a file named `README.md` in your repository root.
-2. If you have a screenshot, save it (e.g., as `screenshot.png`) in the repo and ensure the path matches in the README.
-3. Commit and push:
-   ```bash
-   git add README.md
-   git commit -m "Add updated README with Method 1"
-   git push origin main
